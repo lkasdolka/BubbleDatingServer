@@ -1,5 +1,6 @@
 package edu.bupt.util;
 
+import java.awt.List;
 import java.io.Closeable;
 import java.net.ConnectException;
 import java.sql.Connection;
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.json.JSONObject;
 
 import com.mysql.jdbc.authentication.MysqlClearPasswordPlugin;
 
@@ -99,13 +101,6 @@ public class MySql {
 	}
 	
 	public static void selectAll(String tableName){
-//		for(int i=0;i<colName.length;i++){
-//			if(i!=colName.length-1){
-//				sql+=(colName[i]+",");
-//			}else {
-//				sql+=colName[i];
-//			}
-//		}
 		String sql = "select * from "+tableName;
 		System.out.println(sql);
 		try {
@@ -193,17 +188,6 @@ public class MySql {
 		return null;
 	}
 	
-//	public static HashMap<String, String> getUserInfo(ArrayList<String> colNames,ArrayList<String> values,String username){
-//		HashMap<String, String> userInfo = new HashMap<String,String>();
-//		User user = isExistMultiParam(colNames,values,username);
-//		if(user ==null){
-//			return userInfo;
-//		}else{
-//			
-//		}
-//		
-//	}
-		
 	
 	public static ResponseStatus addUser(String uname,String pw,String email,String gender,String image){
 		if(isExist("u_name",uname)){
@@ -238,6 +222,36 @@ public class MySql {
 		return ResponseStatus.UNKNOWN_ERROR;
 		
 	}
+	
+	public static ArrayList<JSONObject> queryPeopleAround(){
+		ArrayList<JSONObject> res = new ArrayList<JSONObject>();
+		try {
+			// issue : group by cannot sort duplicate items desc with time ,and present the oldest item
+			preparedStatement = connection.prepareStatement("select distinct  invitation.u_id,u_invi,u_posttime,u_name,u_gender,u_loc_lat,u_loc_long from invitation  inner join user_info where  user_info.u_id = invitation.u_id group by invitation.u_id order by u_posttime desc ;");
+			if(preparedStatement.execute()){
+				resultSet = preparedStatement.getResultSet();
+				while(resultSet.next()){
+					JSONObject item = new JSONObject();
+					item.put("u_id", resultSet.getInt(1));
+					item.put("u_invi", resultSet.getString(2));
+					item.put("u_posttime", resultSet.getString(3));
+					item.put("u_name", resultSet.getString(4));
+					item.put("u_gender", resultSet.getString(5));
+					item.put("u_loc_lat", resultSet.getDouble(6));
+					item.put("u_loc_long", resultSet.getDouble(7));
+					res.add(item);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return res;
+		
+	}
+	
+	
 	public static enum ResponseStatus {
 		OK(0),
 		USER_NAME_DUPLICATE(1),
