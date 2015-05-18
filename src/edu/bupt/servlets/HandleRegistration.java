@@ -66,8 +66,10 @@ public class HandleRegistration extends HttpServlet {
 			throws ServletException, IOException {
 
 		
-		String rootDir = request.getSession().getServletContext().getRealPath("/");
-		System.out.println("root dir:"+rootDir);
+//		String rootDir = request.getSession().getServletContext().getRealPath("/");
+//		System.out.println("root dir:"+rootDir);
+		
+//		String storageDir = rootDir + File.separator + "img";
 		
 		String userName  = request.getParameter("username");
 		String password = request.getParameter("password");
