@@ -1,5 +1,7 @@
 package edu.bupt.servlets;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -8,8 +10,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 
+
+
+import edu.bupt.util.ConstantArgs;
+import edu.bupt.util.HXTool;
 import edu.bupt.util.MySql;
 
 public class HandleRegistration extends HttpServlet {
@@ -43,32 +50,6 @@ public class HandleRegistration extends HttpServlet {
 			throws ServletException, IOException {
 		doPost(request, response);
 		
-//		System.out.println("This is a get request.");
-//		System.out.println(request.toString());
-//		String userName  = request.getParameter("username");
-//		String password = request.getParameter("password");
-//		String email = request.getParameter("email");
-//		String gender = request.getParameter("gender");
-//		
-//		System.out.println("new changes");
-//		System.out.println("username:"+userName+
-//				"\npassword:"+password+
-//				"\nemail+:"+email+
-//				"\ngender:"+gender);
-//		
-//		response.setContentType("text/html");
-//		PrintWriter out = response.getWriter();
-//		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
-//		out.println("<HTML>");
-//		out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
-//		out.println("  <BODY>");
-//		out.print("    This is ");
-//		out.print(this.getClass());
-//		out.println(", using the GET method");
-//		out.println("  </BODY>");
-//		out.println("</HTML>");
-//		out.flush();
-//		out.close();
 	}
 
 	/**
@@ -85,19 +66,32 @@ public class HandleRegistration extends HttpServlet {
 			throws ServletException, IOException {
 
 		
-		System.out.println("This is a post request.");
-		System.out.println(request.toString());
+		String rootDir = request.getSession().getServletContext().getRealPath("/");
+		System.out.println("root dir:"+rootDir);
 		
 		String userName  = request.getParameter("username");
 		String password = request.getParameter("password");
 		String email = request.getParameter("email");
 		String gender = request.getParameter("gender");
+		String avatar = request.getParameter("avatar");
+		
 		
 		System.out.println("new changes");
 		System.out.println("username:"+userName+
 				"\npassword:"+password+
 				"\nemail+:"+email+
-				"\ngender:"+gender);
+				"\ngender:"+gender
+				);
+		
+		byte[] avatarData = Base64.decodeBase64(avatar);
+		File avatarImage = new File(ConstantArgs.IMAGE_CACHE_DIR,userName+".png");
+		avatarImage.createNewFile();
+		FileOutputStream outputStream = new FileOutputStream(avatarImage);
+		outputStream.write(avatarData);
+		outputStream.flush();
+		outputStream.close();
+		
+		
 		
 		MySql.connectMysql();
 		boolean f1 = MySql.isExist("u_name",userName);
@@ -109,7 +103,15 @@ public class HandleRegistration extends HttpServlet {
 //		}
 		
 		MySql.ResponseStatus addRes = MySql.addUser(userName, password, email, gender, null);
-		
+		if(addRes == MySql.ResponseStatus.OK){
+			int statusCode = HXTool.registerHXUser(userName, password);
+			if(statusCode == 200){}
+			else{
+				if(addRes == MySql.ResponseStatus.OK){
+					addRes = MySql.ResponseStatus.USER_NOT_ON_HX;
+				}
+		}
+		}
 		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();
 		

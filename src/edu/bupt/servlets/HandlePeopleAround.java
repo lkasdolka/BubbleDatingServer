@@ -53,7 +53,8 @@ public class HandlePeopleAround extends HttpServlet {
 		ArrayList<JSONObject> data = MySql.queryPeopleAround();
 		JSONArray dataArray = new JSONArray(data);
 		for(int i=0;i<dataArray.length();i++){
-			System.out.println("u_navi:"+dataArray.getJSONObject(i).getString("u_invi"));
+			JSONObject item = dataArray.getJSONObject(i);
+			System.out.println("u_name:"+item.getString("u_name")+",u_gender:"+item.getString("u_gender")+"u_gender.length:"+item.getString("u_gender").length()+",u_navi:"+item.getString("u_invi"));
 		}
 		System.out.println("get the json array ready to respond");
 		out.print(dataArray);

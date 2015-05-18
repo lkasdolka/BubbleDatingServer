@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 
 import edu.bupt.bean.User;
+import edu.bupt.util.HXTool;
 import edu.bupt.util.MySql;
 
 public class HandleLogin extends HttpServlet {
@@ -87,19 +88,40 @@ public class HandleLogin extends HttpServlet {
 		}else{
 			User user = MySql.isExistMultiParam(queryKeys,queryValues,userName);
 			if(user != null){
+				//check if HX server has this name
+				boolean HX_OK = false;
+				boolean isExistOnHx = HXTool.getUser(userName);
+				
+				if(!isExistOnHx){
+					int statusCode = HXTool.registerHXUser(userName, password);
+					if(statusCode != 200){
+						System.out.println("Oops, register "+userName+" failed");
+						resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.USER_NOT_ON_HX);
+					}else{
+						HX_OK = true;
+					}
+				}else{
+					HX_OK = true;
+				}
 //				System.out.println("user bean:"+user.toString());
-				resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.OK.getValue());
-				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("u_id", user.getmId());
-				map.put("u_name", user.getmName());
-				map.put("u_password", user.getmPw());
-				map.put("u_email", user.getmEmail());
-				map.put("u_gender", user.getmGender());
-				map.put("u_image", user.getmImage());
-				map.put("u_online", user.getmOnline());
-				JSONObject u_info = new JSONObject(map);
-				System.out.println(u_info.toString());
-				resData.put("user_info", u_info);
+				if(HX_OK){
+					resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.OK.getValue());
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("u_id", user.getmId());
+					map.put("u_name", user.getmName());
+					map.put("u_password", user.getmPw());
+					map.put("u_email", user.getmEmail());
+					map.put("u_gender", user.getmGender());
+					map.put("u_image", user.getmImage());
+					map.put("u_online", user.getmOnline());
+					JSONObject u_info = new JSONObject(map);
+					System.out.println(u_info.toString());
+					resData.put("user_info", u_info);
+					
+				}
+				
+				
+				
 			}else{
 				resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.USERNAME_PASSWORD_UNCOMPATIBLE.getValue());
 			}
