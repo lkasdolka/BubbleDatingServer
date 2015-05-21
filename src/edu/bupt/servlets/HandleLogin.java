@@ -73,6 +73,8 @@ public class HandleLogin extends HttpServlet {
 		MySql.connectMysql();
 		String userName  = request.getParameter("username");
 		String password = request.getParameter("password");
+		double lat = Double.parseDouble(request.getParameter("lat"));
+		double lon = Double.parseDouble(request.getParameter("lon"));
 		System.out.println("username:"+userName);
 		System.out.println("password:"+password);
 		ArrayList<String> queryKeys = new ArrayList<String>();
@@ -86,6 +88,10 @@ public class HandleLogin extends HttpServlet {
 		if(!MySql.isExist("u_name", userName)){
 			resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.UNKOWN_USERNAME.getValue());
 		}else{
+			//update user location
+			MySql.updateUserLoc(userName, lat, lon);
+			
+			// register HX user
 			User user = MySql.isExistMultiParam(queryKeys,queryValues,userName);
 			if(user != null){
 				//check if HX server has this name

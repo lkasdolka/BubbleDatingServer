@@ -76,14 +76,18 @@ public class HandleRegistration extends HttpServlet {
 		String email = request.getParameter("email");
 		String gender = request.getParameter("gender");
 		String avatar = request.getParameter("avatar");
+		double lat = Double.parseDouble(request.getParameter("lat"));
+		double lon = Double.parseDouble(request.getParameter("lon"));
+		
 		
 		
 		System.out.println("new changes");
 		System.out.println("username:"+userName+
 				"\npassword:"+password+
 				"\nemail+:"+email+
-				"\ngender:"+gender
-				);
+				"\ngender:"+gender+
+				"\nlat:"+lat+
+				"\nlon:"+lon);
 		
 		byte[] avatarData = Base64.decodeBase64(avatar);
 		File avatarImage = new File(ConstantArgs.IMAGE_CACHE_DIR,userName+".png");
@@ -99,13 +103,12 @@ public class HandleRegistration extends HttpServlet {
 		boolean f1 = MySql.isExist("u_name",userName);
 		boolean f2 = MySql.isExist("u_email", email);
 		System.out.println(f1+","+f2);
-//		
-//		if(!f1 && !f2){
-//			MySql.addUser(userName, password, email, gender, null);
-//		}
 		
 		MySql.ResponseStatus addRes = MySql.addUser(userName, password, email, gender, null);
 		if(addRes == MySql.ResponseStatus.OK){
+			//更新地理坐标
+			MySql.updateUserLoc(userName, lat, lon);
+			//注册环信账号
 			int statusCode = HXTool.registerHXUser(userName, password);
 			if(statusCode == 200){}
 			else{

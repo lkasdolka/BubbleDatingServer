@@ -13,8 +13,9 @@ public class MyServletContext implements ServletContextListener {
 		// TODO Auto-generated method stub
 //		ConstantArgs.IMAGE_CACHE_DIR = sce.getServletContext().getRealPath("/");
 		String rootDir = sce.getServletContext().getRealPath("/");
-		System.out.println("root dir: "+ rootDir);
-		ConstantArgs.IMAGE_CACHE_DIR = rootDir + File.separator +"WEB-INF"+File.separator+ ConstantArgs.IMG_DIR;
+//		System.out.println("root dir: "+ rootDir);
+		ConstantArgs.IMAGE_CACHE_DIR = rootDir +File.separator+ ConstantArgs.IMG_DIR;
+		System.out.println("image cache dir:"+ ConstantArgs.IMAGE_CACHE_DIR);
 		File mImageCacheDir = new File(ConstantArgs.IMAGE_CACHE_DIR);
 		if(!mImageCacheDir.exists()){
 			mImageCacheDir.mkdir();

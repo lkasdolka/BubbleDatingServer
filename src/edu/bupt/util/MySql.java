@@ -28,6 +28,8 @@ public class MySql {
 	private final static String DRIVER = "com.mysql.jdbc.Driver";
 	private final static String DB_NAME = "bubble_datiing";
 	
+	private final static double EPSILON = 0.00001;
+	
 	private static Connection connection = null;
 	private static PreparedStatement preparedStatement = null;
 	private static ResultSet resultSet = null;
@@ -37,10 +39,10 @@ public class MySql {
 	
 	public static void main(String[] args) {
 		MySql.connectMysql();
-		MySql.selectAll("user_info");
 		
-		System.out.println("add user test2:"+MySql.addUser("test4", "test2", "test4", "f", null).toString());
-		System.out.println("add user Mary:"+MySql.addUser("Mary", "test2", "test2", "f", null).toString());
+		updateUserLoc("test3",22.2,100.0);
+		
+		
 	}
 	
 	
@@ -231,6 +233,9 @@ public class MySql {
 			if(preparedStatement.execute()){
 				resultSet = preparedStatement.getResultSet();
 				while(resultSet.next()){
+					if(Math.abs(resultSet.getDouble(6))<EPSILON || Math.abs(resultSet.getDouble(7))<EPSILON){
+						continue;
+					}
 					JSONObject item = new JSONObject();
 					item.put("u_id", resultSet.getInt(1));
 					item.put("u_invi", resultSet.getString(2));
@@ -248,6 +253,24 @@ public class MySql {
 		}
 		
 		return res;
+		
+	}
+	
+	public static void updateUserLoc(String userName, double lat, double lon){
+		try {
+			preparedStatement = connection.prepareStatement("update user_info set u_loc_lat=?,u_loc_long=? where u_name=?");
+			preparedStatement.setDouble(1, lat);
+			preparedStatement.setDouble(2, lon);
+			preparedStatement.setString(3, userName);
+			System.out.println(preparedStatement.toString());
+			System.out.println(preparedStatement.executeUpdate());
+			connection.commit();
+			System.out.println("update user loc success");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 	}
 	
