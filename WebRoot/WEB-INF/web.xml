@@ -23,6 +23,13 @@
     <servlet-name>HandlePeopleAround</servlet-name>
     <servlet-class>edu.bupt.servlets.HandlePeopleAround</servlet-class>
   </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>HandleDownloadImage</servlet-name>
+    <servlet-class>edu.bupt.servlets.HandleDownloadImage</servlet-class>
+  </servlet>
+
 
 
 
@@ -37,6 +44,10 @@
   <servlet-mapping>
     <servlet-name>HandlePeopleAround</servlet-name>
     <url-pattern>/HandlePeopleAround</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>HandleDownloadImage</servlet-name>
+    <url-pattern>/HandleDownloadImage</url-pattern>
   </servlet-mapping>
     <listener>
         <listener-class>edu.bupt.util.MyServletContext</listener-class>
