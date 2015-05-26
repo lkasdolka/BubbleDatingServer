@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 import edu.bupt.bean.User;
 import edu.bupt.util.HXTool;
-import edu.bupt.util.MySql;
+import edu.bupt.util.SqlTool;
 
 public class HandleLogin extends HttpServlet {
 	
@@ -70,7 +70,6 @@ public class HandleLogin extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		
 		JSONObject resData = new JSONObject();
-		MySql.connectMysql();
 		String userName  = request.getParameter("username");
 		String password = request.getParameter("password");
 		double lat = Double.parseDouble(request.getParameter("lat"));
@@ -85,14 +84,14 @@ public class HandleLogin extends HttpServlet {
 		queryValues.add(password);
 		
 		
-		if(!MySql.isExist("u_name", userName)){
-			resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.UNKOWN_USERNAME.getValue());
+		if(!SqlTool.isExist("u_name", userName)){
+			resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.UNKOWN_USERNAME.getValue());
 		}else{
 			//update user location
-			MySql.updateUserLoc(userName, lat, lon);
+			SqlTool.updateUserLoc(userName, lat, lon);
 			
 			// register HX user
-			User user = MySql.isExistMultiParam(queryKeys,queryValues,userName);
+			User user = SqlTool.isExistMultiParam(queryKeys,queryValues,userName);
 			if(user != null){
 				//check if HX server has this name
 				boolean HX_OK = false;
@@ -102,7 +101,7 @@ public class HandleLogin extends HttpServlet {
 					int statusCode = HXTool.registerHXUser(userName, password);
 					if(statusCode != 200){
 						System.out.println("Oops, register "+userName+" failed");
-						resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.USER_NOT_ON_HX);
+						resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.USER_NOT_ON_HX);
 					}else{
 						HX_OK = true;
 					}
@@ -111,7 +110,7 @@ public class HandleLogin extends HttpServlet {
 				}
 //				System.out.println("user bean:"+user.toString());
 				if(HX_OK){
-					resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.OK.getValue());
+					resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.OK.getValue());
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("u_id", user.getmId());
 					map.put("u_name", user.getmName());
@@ -129,14 +128,13 @@ public class HandleLogin extends HttpServlet {
 				
 				
 			}else{
-				resData.put(MySql.STATUS_KEY, MySql.ResponseStatus.USERNAME_PASSWORD_UNCOMPATIBLE.getValue());
+				resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.USERNAME_PASSWORD_UNCOMPATIBLE.getValue());
 			}
 		}
 		
 		out.print(resData);
 		out.flush();
 		out.close();
-		MySql.endConnection();
 	}
 
 	/**

@@ -17,7 +17,7 @@ import org.json.JSONObject;
 
 import edu.bupt.util.ConstantArgs;
 import edu.bupt.util.HXTool;
-import edu.bupt.util.MySql;
+import edu.bupt.util.SqlTool;
 
 public class HandleRegistration extends HttpServlet {
 
@@ -99,21 +99,20 @@ public class HandleRegistration extends HttpServlet {
 		
 		
 		
-		MySql.connectMysql();
-		boolean f1 = MySql.isExist("u_name",userName);
-		boolean f2 = MySql.isExist("u_email", email);
+		boolean f1 = SqlTool.isExist("u_name",userName);
+		boolean f2 = SqlTool.isExist("u_email", email);
 		System.out.println(f1+","+f2);
 		
-		MySql.ResponseStatus addRes = MySql.addUser(userName, password, email, gender, null);
-		if(addRes == MySql.ResponseStatus.OK){
+		SqlTool.ResponseStatus addRes = SqlTool.addUser(userName, password, email, gender, null);
+		if(addRes == SqlTool.ResponseStatus.OK){
 			//更新地理坐标
-			MySql.updateUserLoc(userName, lat, lon);
+			SqlTool.updateUserLoc(userName, lat, lon);
 			//注册环信账号
 			int statusCode = HXTool.registerHXUser(userName, password);
 			if(statusCode == 200){}
 			else{
-				if(addRes == MySql.ResponseStatus.OK){
-					addRes = MySql.ResponseStatus.USER_NOT_ON_HX;
+				if(addRes == SqlTool.ResponseStatus.OK){
+					addRes = SqlTool.ResponseStatus.USER_NOT_ON_HX;
 				}
 		}
 		}
@@ -128,26 +127,13 @@ public class HandleRegistration extends HttpServlet {
 //			resJsonObject.put(STATUS_KEY, MySql.MySqlEnum.EMAIL_DUPLICATE.getValue());
 //		}
 		
-		resJsonObject.put(MySql.STATUS_KEY, addRes.getValue());
+		resJsonObject.put(SqlTool.STATUS_KEY, addRes.getValue());
 		out.print(resJsonObject);
 		out.flush();
 		out.close();
 		
-		MySql.endConnection();
 		
 		
-		
-//		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
-//		out.println("<HTML>");
-//		out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
-//		out.println("  <BODY>");
-//		out.print("    This is ");
-//		out.print(this.getClass());
-//		out.println(", using the POST method");
-//		out.println("  </BODY>");
-//		out.println("</HTML>");
-		out.flush();
-		out.close();
 	}
 
 	/**

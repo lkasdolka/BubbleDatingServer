@@ -1,5 +1,6 @@
 package edu.bupt.util;
 import java.io.File;
+import java.sql.SQLException;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -22,12 +23,24 @@ public class MyServletContext implements ServletContextListener {
 			System.out.println("mkdir of image cache folder");
 		}
 		
+		try {
+			SqlTool.initConnectionPool();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		// TODO Auto-generated method stub
-
+		try {
+			SqlTool.shutdownDataSource(SqlTool.getInstance());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

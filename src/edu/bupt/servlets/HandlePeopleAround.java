@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import edu.bupt.util.MySql;
+import edu.bupt.util.SqlTool;
 
 public class HandlePeopleAround extends HttpServlet {
 
@@ -49,8 +49,7 @@ public class HandlePeopleAround extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("utf-8");
 		PrintWriter out = response.getWriter();
-		MySql.connectMysql();
-		ArrayList<JSONObject> data = MySql.queryPeopleAround();
+		ArrayList<JSONObject> data = SqlTool.queryPeopleAround();
 		JSONArray dataArray = new JSONArray(data);
 		for(int i=0;i<dataArray.length();i++){
 			JSONObject item = dataArray.getJSONObject(i);
