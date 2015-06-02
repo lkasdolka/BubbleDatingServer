@@ -15,9 +15,11 @@ import org.json.JSONObject;
 
 
 
+
 import edu.bupt.util.ConstantArgs;
 import edu.bupt.util.HXTool;
 import edu.bupt.util.SqlTool;
+import edu.bupt.util.SqlTool.ResponseStatus;
 
 public class HandleRegistration extends HttpServlet {
 
@@ -118,14 +120,15 @@ public class HandleRegistration extends HttpServlet {
 		}
 		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();
-		
 		JSONObject resJsonObject = new JSONObject();
 		
-//		if(f1){
-//			resJsonObject.put(STATUS_KEY, MySql.MySqlEnum.USER_NAME_DUPLICATE.getValue());
-//		}else if(f2){
-//			resJsonObject.put(STATUS_KEY, MySql.MySqlEnum.EMAIL_DUPLICATE.getValue());
-//		}
+		int statusCode = HXTool.registerHXUser(userName, password);
+		if(statusCode == 200){
+			resJsonObject.put(SqlTool.STATUS_KEY, addRes.getValue());
+		}else{
+			resJsonObject.put(SqlTool.STATUS_KEY,ResponseStatus.UNKNOWN_ERROR.getValue());
+		}
+		
 		
 		resJsonObject.put(SqlTool.STATUS_KEY, addRes.getValue());
 		out.print(resJsonObject);

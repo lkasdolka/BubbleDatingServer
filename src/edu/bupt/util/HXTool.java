@@ -30,7 +30,7 @@ public class HXTool {
 	private static final String CLIENT_SECRET = "YXA6zNTcEdfFaANjcQnP3IdnpeV-LIc";
 	private static final String GET_ACCESS_URL = "https://a1.easemob.com/halfdog/bubbledating/token";
 	private static final String REGISTER_URL = "https://a1.easemob.com/halfdog/bubbledating/users";
-	private static String ACCESS_TOKEN = "";
+//	private static String ACCESS_TOKEN = "";
 
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.trustStore", "F:\\Program Files\\Java\\jdk1.8.0_31\\lib\\cacerts");
@@ -61,6 +61,9 @@ public class HXTool {
 			if (entity2 != null) {
 				String content = EntityUtils.toString(entity2);
 				// System.out.println("response:"+content);
+				JSONObject jsonObject = new JSONObject(content);
+				ConstantArgs.HX_ACCESS_TOKEN = jsonObject.getString("access_token");
+				System.out.println("HX_ACCESS_TOKEN:"+ConstantArgs.HX_ACCESS_TOKEN);
 				res = content;
 				EntityUtils.consume(entity2);
 			}
@@ -83,16 +86,12 @@ public class HXTool {
 	}
 	
 	public static boolean getUser(String username){
-		String res = getAccessToken();
 		String ans = null;
 		int statusCode = -1;
-		JSONObject response = new JSONObject(res);
-		ACCESS_TOKEN = response.getString("access_token");
-		
 		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(REGISTER_URL+"/"+username);
-		httpGet.setHeader("Authorization","Bearer "+ACCESS_TOKEN);
+		httpGet.setHeader("Authorization","Bearer "+ConstantArgs.HX_ACCESS_TOKEN);
 		CloseableHttpResponse response1 = null;
 		try {
 			response1 = httpclient.execute(httpGet);
@@ -129,20 +128,18 @@ public class HXTool {
 	}
 	
 	public static int registerHXUser(String user, String pw){
-		String res = getAccessToken();
+		
 		String ans = null;
 		int statusCode = -1;
-		JSONObject response = new JSONObject(res);
-		ACCESS_TOKEN = response.getString("access_token");
-		
 		int registerStatus = -1;
+		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(REGISTER_URL);
 		JSONObject body = new JSONObject();
 		body.put("username", user);
 		body.put("password", pw);
 		httpPost.setHeader("Content-Type", "application/json");
-		httpPost.setHeader("Authorization","Bearer "+ACCESS_TOKEN);
+		httpPost.setHeader("Authorization","Bearer "+ ConstantArgs.HX_ACCESS_TOKEN);
 		CloseableHttpResponse response2 = null;
 		try {
 			StringEntity entity = new StringEntity(body.toString(), ContentType.APPLICATION_JSON);

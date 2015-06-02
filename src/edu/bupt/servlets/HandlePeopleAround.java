@@ -53,7 +53,8 @@ public class HandlePeopleAround extends HttpServlet {
 		JSONArray dataArray = new JSONArray(data);
 		for(int i=0;i<dataArray.length();i++){
 			JSONObject item = dataArray.getJSONObject(i);
-			System.out.println("u_name:"+item.getString("u_name")+",u_gender:"+item.getString("u_gender")+"u_gender.length:"+item.getString("u_gender").length()+",u_navi:"+item.getString("u_invi"));
+			System.out.println("u_name:"+item.getString("u_name")+",u_gender:"+item.getString("u_gender")
+					+",u_navi:"+item.getString("u_invi")+"u_posttime:"+item.getLong("u_posttime"));
 		}
 		System.out.println("get the json array ready to respond");
 		out.print(dataArray);

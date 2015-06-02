@@ -6,4 +6,6 @@ public class ConstantArgs {
 	public static  String IMAGE_CACHE_DIR = null;
 	
 	public static final String IMG_DIR = "img"; 
+	
+	public static  String HX_ACCESS_TOKEN = "";
 }

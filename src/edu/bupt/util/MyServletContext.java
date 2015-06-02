@@ -30,6 +30,9 @@ public class MyServletContext implements ServletContextListener {
 			e.printStackTrace();
 		}
 		
+		/* get access token */
+		HXTool.getAccessToken();
+		
 	}
 
 	@Override

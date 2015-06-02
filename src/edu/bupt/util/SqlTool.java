@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.sql.DataSource;
@@ -40,14 +41,17 @@ public class SqlTool {
 	public final static String STATUS_KEY = "status";
 
 	public static void main(String[] args) {
-		try {
-			SqlTool.initConnectionPool();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		handFeedback("aaa", "I love this app");
+//		try {
+//			SqlTool.initConnectionPool();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		handFeedback("aaa", "I love this app");
+		String s = "https://a1.easemob.com/halfdog/bubbledating/users/loly";
+		System.out.println(s.length());
+		System.out.println(s.charAt(54));
 	}
 
 	public static BasicDataSource getInstance() {
@@ -327,7 +331,7 @@ public class SqlTool {
 			// present the oldest item
 			connection = SqlTool.getInstance().getConnection();
 			preparedStatement = connection
-					.prepareStatement("select distinct  invitation.u_id,u_invi,u_posttime,u_name,u_gender,u_loc_lat,u_loc_long from invitation  inner join user_info where  user_info.u_id = invitation.u_id group by invitation.u_id order by u_posttime desc ;");
+					.prepareStatement("select u_id,u_invi,u_posttime,u_name,u_gender,u_lat,u_lon from invitation;");
 			if (preparedStatement.execute()) {
 				resultSet = preparedStatement.getResultSet();
 				while (resultSet.next()) {
@@ -338,12 +342,15 @@ public class SqlTool {
 					JSONObject item = new JSONObject();
 					item.put("u_id", resultSet.getInt(1));
 					item.put("u_invi", resultSet.getString(2));
-					item.put("u_posttime", resultSet.getString(3));
+					long u_posttime = resultSet.getTimestamp(3).getTime();
+					item.put("u_posttime", u_posttime);
 					item.put("u_name", resultSet.getString(4));
 					item.put("u_gender", resultSet.getString(5));
 					item.put("u_loc_lat", resultSet.getDouble(6));
 					item.put("u_loc_long", resultSet.getDouble(7));
 					res.add(item);
+					
+//					System.out.println(item.toString());
 				}
 			}
 		} catch (SQLException e) {
