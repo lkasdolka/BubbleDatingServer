@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,17 +42,18 @@ public class SqlTool {
 	public final static String STATUS_KEY = "status";
 
 	public static void main(String[] args) {
-//		try {
-//			SqlTool.initConnectionPool();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		handFeedback("aaa", "I love this app");
-		String s = "https://a1.easemob.com/halfdog/bubbledating/users/loly";
-		System.out.println(s.length());
-		System.out.println(s.charAt(54));
+		 try {
+		 SqlTool.initConnectionPool();
+		 } catch (SQLException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
+		
+		 insertInvitation("aaa","m","hi",new Timestamp(new Date().getTime()),0,0);
+		 recycleRes();
+//		String s = "https://a1.easemob.com/halfdog/bubbledating/users/loly";
+//		System.out.println(s.length());
+//		System.out.println(s.charAt(54));
 	}
 
 	public static BasicDataSource getInstance() {
@@ -331,26 +333,26 @@ public class SqlTool {
 			// present the oldest item
 			connection = SqlTool.getInstance().getConnection();
 			preparedStatement = connection
-					.prepareStatement("select u_id,u_invi,u_posttime,u_name,u_gender,u_lat,u_lon from invitation;");
+					.prepareStatement("select u_invi,u_posttime,u_name,u_gender,u_lat,u_lon from invitation;");
 			if (preparedStatement.execute()) {
 				resultSet = preparedStatement.getResultSet();
 				while (resultSet.next()) {
-					if (Math.abs(resultSet.getDouble(6)) < EPSILON
-							|| Math.abs(resultSet.getDouble(7)) < EPSILON) {
+					if (Math.abs(resultSet.getDouble(5)) < EPSILON
+							|| Math.abs(resultSet.getDouble(6)) < EPSILON) {
 						continue;
 					}
 					JSONObject item = new JSONObject();
-					item.put("u_id", resultSet.getInt(1));
-					item.put("u_invi", resultSet.getString(2));
-					long u_posttime = resultSet.getTimestamp(3).getTime();
+//					item.put("u_id", resultSet.getInt(1));
+					item.put("u_invi", resultSet.getString(1));
+					long u_posttime = resultSet.getTimestamp(2).getTime();
 					item.put("u_posttime", u_posttime);
-					item.put("u_name", resultSet.getString(4));
-					item.put("u_gender", resultSet.getString(5));
-					item.put("u_loc_lat", resultSet.getDouble(6));
-					item.put("u_loc_long", resultSet.getDouble(7));
+					item.put("u_name", resultSet.getString(3));
+					item.put("u_gender", resultSet.getString(4));
+					item.put("u_loc_lat", resultSet.getDouble(5));
+					item.put("u_loc_long", resultSet.getDouble(6));
 					res.add(item);
-					
-//					System.out.println(item.toString());
+
+					// System.out.println(item.toString());
 				}
 			}
 		} catch (SQLException e) {
@@ -414,9 +416,51 @@ public class SqlTool {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally{
+			recycleRes();
 		}
 		return 0;
 
+	}
+
+	public static int insertInvitation(String name, String gender,
+			String invitation, Timestamp posttime, double lat, double lon) {
+		try {
+			connection = SqlTool.getInstance().getConnection();
+			String sql = "insert into invitation(u_name,u_gender,u_invi,u_posttime,u_lat,u_lon) "
+					+ "values(?,?,?,?,?,?)";
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, name);
+			preparedStatement.setString(2, gender);
+			preparedStatement.setString(3, invitation);
+			preparedStatement.setTimestamp(4, posttime);
+			preparedStatement.setDouble(5, lat);
+			preparedStatement.setDouble(6, lon);
+
+			boolean flag = preparedStatement.execute();
+
+			if (!flag) {
+				int count = preparedStatement.getUpdateCount();
+				if (count != 0) {
+					System.out
+							.println("insert feed back success, insert count:"
+									+ count);
+					connection.commit();
+					return 1;
+
+				} else {
+					System.out.println("insert failed.");
+					return 0;
+				}
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			recycleRes();
+		}
+		return 0;
 	}
 
 	public static enum ResponseStatus {
