@@ -72,8 +72,10 @@ public class HandleLogin extends HttpServlet {
 		JSONObject resData = new JSONObject();
 		String userName  = request.getParameter("username");
 		String password = request.getParameter("password");
-		double lat = Double.parseDouble(request.getParameter("lat"));
-		double lon = Double.parseDouble(request.getParameter("lon"));
+		String latString = request.getParameter("lat");
+		String lonString = request.getParameter("lon");
+		double lat = Double.parseDouble(latString);
+		double lon = Double.parseDouble(lonString);
 		System.out.println("username:"+userName);
 		System.out.println("password:"+password);
 		ArrayList<String> queryKeys = new ArrayList<String>();
@@ -85,6 +87,7 @@ public class HandleLogin extends HttpServlet {
 		
 		
 		if(!SqlTool.isExist("u_name", userName)){
+			/*user not exist in database */
 			resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.UNKOWN_USERNAME.getValue());
 		}else{
 			//update user location
@@ -101,7 +104,7 @@ public class HandleLogin extends HttpServlet {
 					int statusCode = HXTool.registerHXUser(userName, password);
 					if(statusCode != 200){
 						System.out.println("Oops, register "+userName+" failed");
-						resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.USER_NOT_ON_HX);
+						resData.put(SqlTool.STATUS_KEY, SqlTool.ResponseStatus.HX_REGISTER_FAILED.getValue());
 					}else{
 						HX_OK = true;
 					}

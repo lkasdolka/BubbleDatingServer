@@ -26,7 +26,7 @@ import com.mysql.jdbc.authentication.MysqlClearPasswordPlugin;
 import edu.bupt.bean.User;
 
 public class SqlTool {
-	private final static String USER = "andy";
+	private final static String USER = "root";
 	private final static String URL = "jdbc:mysql://localhost:3306";
 	private final static String URL2 = "jdbc:mysql://localhost:3306/bubble_datiing";
 	private final static String PW = "awesome222";
@@ -279,41 +279,31 @@ public class SqlTool {
 	}
 
 	public static ResponseStatus addUser(String uname, String pw, String email,
-			String gender, String image) {
-		if (isExist("u_name", uname)) {
-			System.out.println(uname + " already exists!");
-			return ResponseStatus.USER_NAME_DUPLICATE;
-		}
-		if (isExist("u_email", email)) {
-			System.out.println(email + " already exists!");
-			return ResponseStatus.EMAIL_DUPLICATE;
-		}
+			String gender, String image,double lat, double lon) {
 
-		String sql = "insert into user_info (u_id,u_name,u_pw,u_email,u_gender,u_image) values ("
-				+ null
-				+ ",'"
+		String sql = "insert into user_info (u_name,u_pw,u_email,u_gender,u_image,u_loc_lat,"
+				+ "u_loc_long) values ('"
 				+ uname
 				+ "','"
 				+ pw
 				+ "','"
 				+ email
 				+ "','"
-				+ gender + "'," + null + ")";
+				+ gender + "'," + null +","+ lat+","+lon+")";
 		System.out.println(sql);
 		try {
 			connection = SqlTool.getInstance().getConnection();
 			preparedStatement = connection.prepareStatement(sql);
-			if (!preparedStatement.execute()) {
-				int count = preparedStatement.getUpdateCount();
-				if (count > 0) {
-					System.out.println("insert successfully," + count
-							+ " line(s) updated");
-					connection.commit();
-					return ResponseStatus.OK;
-				}
+			int updateNum = preparedStatement.executeUpdate();
+			System.out.println("update num:"+updateNum);
+			if (updateNum>0) {
+				System.out.println("insert successfully," + updateNum
+						+ " line(s) updated");
+				connection.commit();
+				return ResponseStatus.OK;
 			} else {
 				System.out.println("insert fails.");
-				return ResponseStatus.UNKNOWN_ERROR;
+				return ResponseStatus.INSERT_FAILED;
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -322,7 +312,7 @@ public class SqlTool {
 			SqlTool.recycleRes();
 		}
 		System.out.println("exception happened during add user.");
-		return ResponseStatus.UNKNOWN_ERROR;
+		return ResponseStatus.SQL_EXCEPTION;
 
 	}
 
@@ -396,21 +386,18 @@ public class SqlTool {
 			preparedStatement = connection.prepareStatement(insertSql);
 			preparedStatement.setString(1, username);
 			preparedStatement.setString(2, content);
+			
+			System.out.println(preparedStatement.toString());
 
-			boolean flag = preparedStatement.execute();
-			if (!flag) {
-				int count = preparedStatement.getUpdateCount();
-				if (count != 0) {
-					System.out
-							.println("insert feed back success, insert count:"
-									+ count);
-					connection.commit();
-					return 1;
-
-				} else {
-					System.out.println("insert failed.");
-					return 0;
-				}
+			int updateCount = preparedStatement.executeUpdate();
+			if(updateCount>0){
+				System.out
+				.println("insert feed back success");
+				connection.commit();
+				return 1;
+			}else{
+				System.out.println("insert failed.");
+				return 0;
 			}
 
 		} catch (SQLException e) {
@@ -437,23 +424,20 @@ public class SqlTool {
 			preparedStatement.setDouble(5, lat);
 			preparedStatement.setDouble(6, lon);
 
-			boolean flag = preparedStatement.execute();
+			int updateCount = preparedStatement.executeUpdate();
+			if (updateCount > 0) {
+				System.out
+						.println("insert feed back success, insert count:"
+								+ updateCount);
+				connection.commit();
+				return 1;
 
-			if (!flag) {
-				int count = preparedStatement.getUpdateCount();
-				if (count != 0) {
-					System.out
-							.println("insert feed back success, insert count:"
-									+ count);
-					connection.commit();
-					return 1;
-
-				} else {
-					System.out.println("insert failed.");
-					return 0;
-				}
-
+			} else {
+				System.out.println("insert failed.");
+				return 0;
 			}
+
+		
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -465,7 +449,8 @@ public class SqlTool {
 
 	public static enum ResponseStatus {
 		OK(0), USER_NAME_DUPLICATE(1), EMAIL_DUPLICATE(2), UNKNOWN_ERROR(3), UNKOWN_USERNAME(
-				4), USERNAME_PASSWORD_UNCOMPATIBLE(5), USER_NOT_ON_HX(6);
+				4), USERNAME_PASSWORD_UNCOMPATIBLE(5), HX_REGISTER_FAILED(6),INSERT_FAILED(7),
+				SQL_EXCEPTION(8);
 
 		private final int value;
 
