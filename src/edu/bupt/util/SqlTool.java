@@ -67,6 +67,7 @@ public class SqlTool {
 		ds.setUsername(USER);
 		ds.setPassword(PW);
 		ds.setDefaultAutoCommit(false);
+		ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;");
 	}
 
 	public static void shutdownDataSource(DataSource ds) throws SQLException {
