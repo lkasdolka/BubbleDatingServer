@@ -278,8 +278,11 @@ public class SqlTool {
 		return null;
 	}
 
-	public static ResponseStatus addUser(String uname, String pw, String email,
-			String gender, String image,double lat, double lon) {
+	public static int addUser(String uname, String pw, String email,
+			String gender, String image,double lat, double lon) throws SQLException {
+		
+		int result = -1;
+		int responseStatus = ResponseStatus.INSERT_FAILED.getValue();
 
 		String sql = "insert into user_info (u_name,u_pw,u_email,u_gender,u_image,u_loc_lat,"
 				+ "u_loc_long) values ('"
@@ -299,20 +302,34 @@ public class SqlTool {
 			if (updateNum>0) {
 				System.out.println("insert successfully," + updateNum
 						+ " line(s) updated");
-				connection.commit();
-				return ResponseStatus.OK;
+//				connection.commit();
+				result = ResponseStatus.OK.getValue();
 			} else {
 				System.out.println("insert fails.");
-				return ResponseStatus.INSERT_FAILED;
+				result =  ResponseStatus.INSERT_FAILED.getValue();
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			result = ResponseStatus.SQL_EXCEPTION.getValue();
+			System.out.println("exception happened during add user.");
 			e.printStackTrace();
-		} finally {
-			SqlTool.recycleRes();
+		} 
+		if(result == ResponseStatus.OK.getValue()){
+
+			// 注册环信账号
+			int statusCode = HXTool.registerHXUser(uname, pw);
+			if (statusCode == 200) {
+				responseStatus =  ResponseStatus.OK.getValue();
+				connection.commit();
+			} else {
+				responseStatus = ResponseStatus.HX_REGISTER_FAILED.getValue();
+				connection.rollback();
+			}
+		
 		}
-		System.out.println("exception happened during add user.");
-		return ResponseStatus.SQL_EXCEPTION;
+		
+		SqlTool.recycleRes();
+		return responseStatus;
 
 	}
 
@@ -423,6 +440,7 @@ public class SqlTool {
 			preparedStatement.setTimestamp(4, posttime);
 			preparedStatement.setDouble(5, lat);
 			preparedStatement.setDouble(6, lon);
+			
 
 			int updateCount = preparedStatement.executeUpdate();
 			if (updateCount > 0) {

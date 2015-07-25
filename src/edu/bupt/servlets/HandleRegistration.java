@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -78,6 +79,8 @@ public class HandleRegistration extends HttpServlet {
 		// System.out.println("root dir:"+rootDir);
 
 		// String storageDir = rootDir + File.separator + "img";
+		
+		int addResponse = ResponseStatus.INSERT_FAILED.getValue();
 
 		String userName = request.getParameter("username");
 		String password = request.getParameter("password");
@@ -130,26 +133,34 @@ public class HandleRegistration extends HttpServlet {
 			return ;
 		}
 
-		SqlTool.ResponseStatus addRes = SqlTool.addUser(userName, password,
-				email, gender, null,lat,lon);
-		if (addRes == SqlTool.ResponseStatus.OK) {
-//			// 更新地理坐标
-//			SqlTool.updateUserLoc(userName, lat, lon);
-			// 注册环信账号
-			int statusCode = HXTool.registerHXUser(userName, password);
-			if (statusCode == 200) {
-				resJsonObject.put(SqlTool.STATUS_KEY, addRes.getValue());
-			} else {
-				resJsonObject.put(SqlTool.STATUS_KEY,
-						SqlTool.ResponseStatus.HX_REGISTER_FAILED.getValue());
-			}
-		}else{
-			/*数据库插入失败*/
-			resJsonObject.put(SqlTool.STATUS_KEY,
-					addRes.getValue());
+		try {
+			addResponse = SqlTool.addUser(userName, password,
+					email, gender, null,lat,lon);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		
+//		if (addRes == SqlTool.ResponseStatus.OK) {
+////			// 更新地理坐标
+////			SqlTool.updateUserLoc(userName, lat, lon);
+//			// 注册环信账号
+//			int statusCode = HXTool.registerHXUser(userName, password);
+//			if (statusCode == 200) {
+//				resJsonObject.put(SqlTool.STATUS_KEY, ResponseStatus.OK.getValue());
+//				prep
+//			} else {
+//				resJsonObject.put(SqlTool.STATUS_KEY,
+//						SqlTool.ResponseStatus.HX_REGISTER_FAILED.getValue());
+//			}
+//		}else{
+//			/*数据库插入失败*/
+//			resJsonObject.put(SqlTool.STATUS_KEY,
+//					addRes.getValue());
+//		}
 
-
+		resJsonObject.put(SqlTool.STATUS_KEY, addResponse);
 		out.print(resJsonObject);
 		out.flush();
 		out.close();
